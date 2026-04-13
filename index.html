@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cloud Scout Adventure</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+body {
+  margin:0;
+  font-family:'Nunito', sans-serif;
+  background:#0a1628;
+}
+
+/* SCREENS */
+.screen { display:none; }
+.screen.active { display:block; animation: fadeIn 0.6s ease; }
+
+/* TEXT */
+.story-text {
+  font-size:20px;
+  line-height:1.9;
+}
+
+/* SKY */
+.sky-stage canvas {
+  width:100%;
+  height:420px;
+}
+
+/* STORY CARD */
+.story-card {
+  max-width:900px;
+  margin:-80px auto 40px;
+  background:white;
+  border-radius:24px;
+  padding:30px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.2);
+}
+
+/* BUTTONS */
+.choice-btn {
+  font-size:18px;
+  padding:16px;
+  margin-top:10px;
+  width:100%;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+}
+
+/* DIALOGUE */
+.dialogue {
+  margin:14px 0;
+  padding:14px 18px;
+  border-radius:16px;
+  font-weight:700;
+}
+
+.zara { background:#fff4e6; }
+.leo { background:#eef4ff; }
+
+/* COVER */
+.cover {
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  color:white;
+  padding:40px;
+  background:linear-gradient(#0a1628,#1a3a6e);
+}
+
+.cover h1 {
+  font-size:44px;
+}
+
+/* BUTTON */
+.start-btn {
+  background:#f4b942;
+  padding:16px 40px;
+  border:none;
+  border-radius:50px;
+  font-weight:900;
+  cursor:pointer;
+  margin-top:30px;
+}
+
+/* ANIM */
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- STANDARDS -->
+<div id="standards" class="screen active cover">
+  <h1>The Cloud Scout Adventure</h1>
+  <h2>Educational Standards (Grade 2–4)</h2>
+
+  <p><b>NGSS 2-ESS2-3:</b> Identify forms of water on Earth</p>
+  <p><b>NGSS 3-ESS2-1:</b> Describe weather patterns</p>
+  <p><b>Science Practice:</b> Observing patterns</p>
+
+  <button class="start-btn" onclick="goToCover()">Continue</button>
+</div>
+
+<!-- COVER -->
+<div id="cover" class="screen cover">
+  <h1>The Cloud Scout Adventure</h1>
+  <p>Zara is about to read the sky…</p>
+  <button class="start-btn" onclick="startGame()">Start Story</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+
+  <div class="sky-stage">
+    <canvas id="sky"></canvas>
+  </div>
+
+  <div class="story-card">
+    <div class="story-text" id="story"></div>
+    <div id="choices"></div>
+  </div>
+
+</div>
+
+<script>
+function goToCover(){
+  document.getElementById("standards").classList.remove("active");
+  document.getElementById("cover").classList.add("active");
+}
+
+function startGame(){
+  document.getElementById("cover").classList.remove("active");
+  document.getElementById("game").classList.add("active");
+  showScene(0);
+}
+
+const scenes = [
+{
+text: `
+<div>👧 Zara &nbsp; 🦉 Aani &nbsp; 👦 Leo</div>
+
+The lake stretches forever.
+
+<div class="dialogue leo">“What are those?” — Leo</div>
+
+Zara looks up. Thin white streaks stretch across the sky.
+
+<div class="dialogue zara">“I think… they mean something.”</div>
+
+What are these clouds?
+`,
+choices:[
+{t:"Cirrus (thin, high clouds)", n:1},
+{t:"Cumulus (puffy clouds)", n:2}
+]
+},
+
+{
+text:`
+Correct!
+
+Cirrus clouds are high and wispy.
+
+<div class="dialogue zara">“They might mean weather is changing…”</div>
+
+Later… big clouds appear.
+
+They are growing taller.
+
+What do you do?
+`,
+choices:[
+{t:"Go inside", n:3},
+{t:"Keep playing", n:4}
+]
+},
+
+{
+text:`Not quite. Those were cirrus clouds.
+
+Try again.`,
+choices:[
+{t:"Go back", n:0}
+]
+},
+
+{
+text:`
+You chose to go inside.
+
+The sky darkens.
+
+BOOM.
+
+Rain crashes down.
+
+<div class="dialogue leo">“You were right!”</div>
+
+🌟 You saved everyone!
+`,
+choices:[]
+},
+
+{
+text:`
+You stayed outside.
+
+Suddenly—
+
+RAIN pours.
+
+You're soaked!
+
+<div class="dialogue zara">“Next time… I’ll watch the clouds.”</div>
+`,
+choices:[]
+}
+];
+
+function showScene(i){
+  const s = scenes[i];
+  document.getElementById("story").innerHTML = s.text;
+
+  const c = document.getElementById("choices");
+  c.innerHTML="";
+
+  s.choices.forEach(choice=>{
+    const btn=document.createElement("button");
+    btn.className="choice-btn";
+    btn.innerText=choice.t;
+    btn.onclick=()=>showScene(choice.n);
+    c.appendChild(btn);
+  });
+
+  drawSky(i);
+}
+
+function drawSky(i){
+  const canvas=document.getElementById("sky");
+  const ctx=canvas.getContext("2d");
+  canvas.width=window.innerWidth;
+  canvas.height=420;
+
+  const gradients=[
+    ["#0d2755","#7ab8e8"],
+    ["#1a4a8a","#7abbea"],
+    ["#333","#999"],
+    ["#111","#444"],
+    ["#222","#555"]
+  ];
+
+  const g=ctx.createLinearGradient(0,0,0,420);
+  gradients[i].forEach((c,idx)=>g.addColorStop(idx, c));
+
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,canvas.width,420);
+}
+</script>
+
+</body>
+</html>
